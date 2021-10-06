@@ -25,11 +25,11 @@ def get_section():
 
 
 def get_psid():
-    rg.integers(1000000, 9999999, endpoint=True)
+    return rg.integers(1000000, 9999999, endpoint=True)
 
 
 def get_middle_name():
-    return choice([None, fake.first_name])
+    return choice([None, fake.first_name()])
 
 
 @dataclass
@@ -46,7 +46,7 @@ class Student:
     email: Optional[str] = None
     full_name: str = field(init=False)
 
-    def __post_init___(self):
+    def __post_init__(self):
         """Create attributes that depend on other attributes."""
         m = self.middle_name[0].lower() if self.middle_name is not None else "x"
 
@@ -63,7 +63,7 @@ class Student:
 
         self.full_name = f"{self.last_name}"
         if self.modifier is not None:
-            self.full_name += f" {self.modifier}"
+            self.full_name += f" {self.modifier}, "
         else:
             self.full_name += ", "
         self.full_name += self.first_name
@@ -124,6 +124,10 @@ df = pd.concat(
             ],
         ),
         pd.DataFrame(
+            rg.integers(60, 100, endpoint=True, size=(len(students), N_EXAMS)),
+            columns=[f"Exam {n}" for n in range(1, N_EXAMS + 1)],
+        ),
+        pd.DataFrame(
             np.ones((len(students), N_EXAMS), dtype=int) * 100,
             columns=[f"Exam {n} - Max Points" for n in range(1, N_EXAMS + 1)],
         ),
@@ -167,7 +171,7 @@ hw_exam_grades = df.filter(
 ).rename(
     columns={
         "netid": "SID",
-        "first_name": "First_Name",
+        "first_name": "First Name",
         "last_name": "Last Name",
     }
 )
